@@ -1,4 +1,4 @@
-local HttpService = game:GetService("HttpService")
+local HttpService = game:GetService("HttpService") -- bu
 local saveFile = "pedrohub_sigma.json"
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -324,5 +324,6 @@ local function processIngredients()
 end
 
 processIngredients()
+
 
 
