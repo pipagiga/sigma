@@ -1,4 +1,4 @@
-local Players = game:GetService("Players") 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
@@ -7,8 +7,8 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 380, 0, 280)
-Frame.Position = UDim2.new(0.5, -190, 0, 100)
+Frame.Size = UDim2.new(0, 360, 0, 220)
+Frame.Position = UDim2.new(0.5, -170, 0, 100)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.Parent = ScreenGui
 
@@ -23,7 +23,7 @@ TitleLabel.Size = UDim2.new(0, 100, 1, 0)
 TitleLabel.Position = UDim2.new(0, 5, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.Text = "pedrohub v1.0.3"
+TitleLabel.Text = "pedrohub v1.0.1"
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = TitleBar
 
@@ -38,13 +38,13 @@ local function createButton(text, pos)
     return btn
 end
 
-local UpBtn = createButton("↑", UDim2.new(1, -225, 0, 2))
-local DownBtn = createButton("↓", UDim2.new(1, -200, 0, 2))
-local LeftBtn = createButton("←", UDim2.new(1, -175, 0, 2))
-local RightBtn = createButton("→", UDim2.new(1, -150, 0, 2))
-local ForceBtn = createButton("🔄", UDim2.new(1, -125, 0, 2))
-local PauseButton = createButton("▶️", UDim2.new(1, -100, 0, 2))
-local CloseButton = createButton("X", UDim2.new(1, -75, 0, 2))
+local UpBtn = createButton("↑", UDim2.new(1, -175, 0, 2))
+local DownBtn = createButton("↓", UDim2.new(1, -150, 0, 2))
+local LeftBtn = createButton("←", UDim2.new(1, -125, 0, 2))
+local RightBtn = createButton("→", UDim2.new(1, -100, 0, 2))
+local ResetBtn = createButton("🔄", UDim2.new(1, -75, 0, 2))
+local PauseButton = createButton("▶️", UDim2.new(1, -50, 0, 2))
+local CloseButton = createButton("X", UDim2.new(1, -25, 0, 2))
 CloseButton.TextColor3 = Color3.fromRGB(255, 0, 0)
 
 local running = true
@@ -61,7 +61,7 @@ PauseButton.MouseButton1Click:Connect(function()
     PauseButton.Text = paused and "▶️" or "⏸️"
 end)
 
-ForceBtn.MouseButton1Click:Connect(function()
+ResetBtn.MouseButton1Click:Connect(function()
     forceReset = true
 end)
 
@@ -80,7 +80,7 @@ RightBtn.MouseButton1Click:Connect(function()
 end)
 
 local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Size = UDim2.new(1, -240, 0, 20)
+StatusLabel.Size = UDim2.new(1, -220, 0, 20)
 StatusLabel.Position = UDim2.new(0, 5, 0, 25)
 StatusLabel.BackgroundTransparency = 1
 StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -98,7 +98,6 @@ IngredLabel.TextXAlignment = Enum.TextXAlignment.Left
 IngredLabel.Parent = Frame
 
 local IngredientBoxes = {}
-local IngredientLimits = {}
 for i=1,5 do
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 50, 0, 20)
@@ -109,21 +108,11 @@ for i=1,5 do
     box.TextColor3 = Color3.fromRGB(255,255,255)
     box.Parent = Frame
     table.insert(IngredientBoxes, box)
-
-    local limitBox = Instance.new("TextBox")
-    limitBox.Size = UDim2.new(0, 25, 0, 20)
-    limitBox.Position = UDim2.new(0, 5 + (i-1)*55, 0, 95)
-    limitBox.Text = "999"
-    limitBox.ClearTextOnFocus = false
-    limitBox.BackgroundColor3 = Color3.fromRGB(100,100,100)
-    limitBox.TextColor3 = Color3.fromRGB(255,255,255)
-    limitBox.Parent = Frame
-    table.insert(IngredientLimits, limitBox)
 end
 
 local KitLabel = Instance.new("TextLabel")
 KitLabel.Size = UDim2.new(0, 100, 0, 20)
-KitLabel.Position = UDim2.new(0, 5, 0, 125)
+KitLabel.Position = UDim2.new(0, 5, 0, 105)
 KitLabel.Text = "Cooking Kits:"
 KitLabel.TextColor3 = Color3.fromRGB(255,255,255)
 KitLabel.BackgroundTransparency = 1
@@ -134,7 +123,7 @@ local KitBoxes = {}
 for i=1,3 do
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 50, 0, 20)
-    box.Position = UDim2.new(0, 5 + (i-1)*55, 0, 150)
+    box.Position = UDim2.new(0, 5 + (i-1)*55, 0, 130)
     box.Text = ""
     box.ClearTextOnFocus = false
     box.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -143,14 +132,12 @@ for i=1,3 do
     table.insert(KitBoxes, box)
 end
 
--- FUNÇÃO ATUALIZADA PARA EQUIPAR CONSIDERANDO LIMITE DE X
-local function equipAndSubmit(ingredientName, limitValue)
+local function equipAndSubmit(ingredientName, kgLimit)
     for _, item in ipairs(backpack:GetChildren()) do
         if item:IsA("Tool") then
-            -- Pega X do formato "[X.YYkg]" no final
-            local numberStr = string.match(item.Name, "%[(%d+)%.%d*kg%]$")
-            local numberVal = tonumber(numberStr) or 0
-            if string.find(item.Name, ingredientName.."%[") and numberVal <= tonumber(limitValue) then
+            local stringNumber = string.match(item.Name, "%[(%d+)%.%d*kg%]$")
+            local stringLimit = tonumber(stringNumber) or 0
+            if string.find(item.Name, ingredientName.."%[") and stringLimit <= tonumber(kgLimit) then
                 item.Parent = player.Character
                 local args = {"SubmitHeldPlant", KitBoxes[1].Text}
                 ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
@@ -161,15 +148,14 @@ local function equipAndSubmit(ingredientName, limitValue)
     return false
 end
 
--- FUNÇÕES EXISTENTES
 local function allIngredientsInsidePot(insidePotFrame)
     local insideNames = {}
     for _, child in ipairs(insidePotFrame:GetChildren()) do
-        insideNames[child.Name] = true
+        insideNames[child.Name:lower()] = true
     end
     local anyIngredient = false
-    for i, box in ipairs(IngredientBoxes) do
-        local ingredient = box.Text
+    for _, box in ipairs(IngredientBoxes) do
+        local ingredient = box.Text:lower()
         if ingredient ~= "" then
             anyIngredient = true
             if not insideNames[ingredient] then
@@ -194,7 +180,7 @@ local function findPlayerFarm()
                 if sg then
                     local playerLabel = sg:FindFirstChild("Player") and sg.Player:FindFirstChildWhichIsA("TextLabel")
                     if playerLabel and string.find(playerLabel.Text, player.Name) then
-                        print("✅ Farm do jogador encontrada:", farm.Name, "Índice:", idx)
+                        print("farm do jogador encontrada:", farm.Name, "Índice:", idx)
                         return farm, idx
                     end
                 end
@@ -207,80 +193,91 @@ end
 local function findCookingKit(farm)
     local children = farm:WaitForChild("Important"):WaitForChild("Cosmetic_Physical"):GetChildren()
     for idx, child in ipairs(children) do
-        if child:FindFirstChild("Cooking Kit") then
-            return child, idx
+        local isKit = child:FindFirstChild("Cooking Kit")
+        if isKit then
+            return isKit, idx
         end
     end
     return nil, nil
 end
 
--- LOOP PRINCIPAL
 local function processIngredients()
     task.spawn(function()
         while running do
             if paused then
-                StatusLabel.Text = "pedrácio hubulus pausado..."
+                StatusLabel.Text = "pedrácio hubulus tá afim de rodar, mas pausarão ele..."
                 task.wait(0.5)
                 continue
             end
-
-            if forceReset then forceReset = false end
-            StatusLabel.Text = "Buscando plot do player..."
+            if forceReset then
+                forceReset = false
+            end
+            StatusLabel.Text = "pedrácio hubulus está em busca da plot do player"
             local farm, farmIndex = findPlayerFarm()
             if not farm then
-                StatusLabel.Text = "Não encontrou plot, tentando novamente..."
+                StatusLabel.Text = "pedrácio hubulus não encontrou a plot do player, tentando novamente..."
                 task.wait(2)
                 continue
             end
-
-            StatusLabel.Text = "Buscando cooking kit..."
-            local cp, cpIndex = findCookingKit(farm)
-            if not cp then
-                StatusLabel.Text = "Não encontrou cooking kit, tentando novamente..."
+            StatusLabel.Text = "pedrácio hubulus está em busca do cooking kit"
+            local cukpot, cukpotIndex = findCookingKit(farm)
+            if not cukpot then
+                StatusLabel.Text = "pedrácio hubulus não encontrou o cooking pot, tentando novamente..."
                 task.wait(2)
                 continue
             end
-
-            StatusLabel.Text = "Checando tempo..."
+            StatusLabel.Text = "pedrácio hubulus está checando o tempo de cuzudo"
             local timeLabel
-            local ok, result = pcall(function() return cp.CookTimeDisplay.Face.SurfaceGui.TimeDisplayFrame.TimeLabel end)
-            if ok then timeLabel = result else
-                StatusLabel.Text = "Não conseguiu checar tempo"
+            local ok, result = pcall(function()
+                return cukpot.CookTimeDisplay.Face.SurfaceGui.TimeDisplayFrame.TimeLabel
+            end)
+            if ok then
+                timeLabel = result
+            else
+                StatusLabel.Text = "pedrácio hubulus não conseguiu checar o tempo de cuzudo"
                 task.wait(2)
                 continue
             end
-
             local timeText = timeLabel.Text
-            StatusLabel.Text = "Faltam "..timeText.." para terminar"
-            if string.find(timeText, "00:00") or string.find(timeText, "Ready") then
-                StatusLabel.Text = "Comida pronta! Pegando..."
+            StatusLabel.Text = "pedrácio hubulus checou e faltam "..timeText.." para terminar de cuzur"
+            if string.find(timeText, "00:00") then
+                StatusLabel.Text = "pedrácio hubulus tá afim de cuzar"
+            elseif string.find(timeText, "Ready") then
+                StatusLabel.Text = "pedrácio hubulus notou que a comida está pronta a comida está pronta"
                 local args = {"GetFoodFromPot", KitBoxes[1].Text}
                 ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
             else
-                StatusLabel.Text = "Enviando ingredientes..."
-                for i, box in ipairs(IngredientBoxes) do
-                    local ingredient = box.Text
-                    local limitValue = IngredientLimits[i].Text
-                    if ingredient ~= "" then
-                        local success = equipAndSubmit(ingredient, limitValue)
-                        if success then task.wait(1) end
+                StatusLabel.Text = "pedrácio hubulus fica no aguardo enquanto a comida cuzui"
+                local args = {"CookBest", KitBoxes[1].Text}
+                ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
+                task.wait(5)
+                continue
+            end
+            StatusLabel.Text = "pedrácio hubulus tá enviando os ingredientes pra cuzer"
+            for _, box in ipairs(IngredientBoxes) do
+                local ingredient = box.Text
+                if ingredient ~= "" then
+                    local success = equipAndSubmit(ingredient)
+                    if success then
+                        task.wait(1)
                     end
                 end
-
-                local insidePotFrame = cp.IngredientsBoard.IngredientListPart.CookingIngredientGui.Background.InsidePotFrame
-                local allOk, anyIngredient = allIngredientsInsidePot(insidePotFrame)
-                if not anyIngredient then task.wait(1) continue end
-                if allOk then
-                    StatusLabel.Text = "Cozinhando..."
-                    local args = {"CookBest", KitBoxes[1].Text}
-                    ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
-                    task.wait(2)
-                else
-                    StatusLabel.Text = "Ingrediente faltando, tentando novamente..."
-                    task.wait(1)
-                end
             end
-            task.wait(1)
+            local insidePotFrame = cukpot.IngredientsBoard.IngredientListPart.CookingIngredientGui.Background.InsidePotFrame
+            local allOk, anyIngredient = allIngredientsInsidePot(insidePotFrame)
+            if not anyIngredient then
+                task.wait(1)
+                continue
+            end
+            if allOk then
+                StatusLabel.Text = "pedrácio hubulus decidiu que é hora de cuzar"
+                local args = {"CookBest", KitBoxes[1].Text}
+                ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
+                task.wait(2)
+            else
+                StatusLabel.Text = "pedrácio hubulus sentiu falta de alguma coisa, tentando novamente..."
+                task.wait(1)
+            end
         end
     end)
 end
