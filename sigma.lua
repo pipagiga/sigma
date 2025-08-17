@@ -7,8 +7,8 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 370, 0, 260)
-Frame.Position = UDim2.new(0.5, -185, 0, 100)
+Frame.Size = UDim2.new(0, 360, 0, 220)
+Frame.Position = UDim2.new(0.5, -170, 0, 100)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.Parent = ScreenGui
 
@@ -112,8 +112,8 @@ for i=1,5 do
 
     local limitBox = Instance.new("TextBox")
     limitBox.Size = UDim2.new(0, 25, 0, 20)
-    limitBox.Position = UDim2.new(0, 60 + (i-1)*55, 0, 75)
-    limitBox.Text = "9999"
+    limitBox.Position = UDim2.new(0, 5 + (i-1)*55, 0, 100)
+    limitBox.Text = "99999999"
     limitBox.ClearTextOnFocus = false
     limitBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
     limitBox.TextColor3 = Color3.fromRGB(255,255,255)
@@ -123,7 +123,7 @@ end
 
 local KitLabel = Instance.new("TextLabel")
 KitLabel.Size = UDim2.new(0, 100, 0, 20)
-KitLabel.Position = UDim2.new(0, 5, 0, 105)
+KitLabel.Position = UDim2.new(0, 5, 0, 130)
 KitLabel.Text = "Cooking Kits:"
 KitLabel.TextColor3 = Color3.fromRGB(255,255,255)
 KitLabel.BackgroundTransparency = 1
@@ -134,7 +134,7 @@ local KitBoxes = {}
 for i=1,3 do
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 50, 0, 20)
-    box.Position = UDim2.new(0, 5 + (i-1)*55, 0, 130)
+    box.Position = UDim2.new(0, 5 + (i-1)*55, 0, 155)
     box.Text = ""
     box.ClearTextOnFocus = false
     box.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -146,14 +146,19 @@ end
 local function equipAndSubmit(ingredientName, kgLimit)
     for _, item in ipairs(backpack:GetChildren()) do
         if item:IsA("Tool") then
-            local numberX = string.match(item.Name, "%[(%d+)%.%d*kg%]$")
-            numberX = tonumber(numberX) or 0
-            if string.find(item.Name, ingredientName.." %[") and numberX <= tonumber(kgLimit) then
-                print("Equipando item:", item.Name, "com limite:", kgLimit)
-                item.Parent = player.Character
-                local args = {"SubmitHeldPlant", KitBoxes[1].Text}
-                ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
-                return true
+            local stringNumber = string.match(item.Name, "%[(%d+)%.%d*kg%]$")
+            local numberX = tonumber(stringNumber) or 0
+            if string.find(item.Name, ingredientName.." %[") then
+                print("Encontrado item:", item.Name, "X extraído:", numberX, "Limite:", kgLimit)
+                if numberX <= tonumber(kgLimit) then
+                    print("Equipando item:", item.Name)
+                    item.Parent = player.Character
+                    local args = {"SubmitHeldPlant", KitBoxes[1].Text}
+                    ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
+                    return true
+                else
+                    print("Ignorando item, X acima do limite:", item.Name)
+                end
             end
         end
     end
@@ -266,11 +271,11 @@ local function processIngredients()
                 continue
             end
             StatusLabel.Text = "pedrácio hubulus tá enviando os ingredientes pra cuzer"
-            for i, box in ipairs(IngredientBoxes) do
+            for idx, box in ipairs(IngredientBoxes) do
                 local ingredient = box.Text
-                local kgLimit = LimitBoxes[i].Text
+                local limitValue = LimitBoxes[idx].Text
                 if ingredient ~= "" then
-                    local success = equipAndSubmit(ingredient, kgLimit)
+                    local success = equipAndSubmit(ingredient, limitValue)
                     if success then
                         task.wait(1)
                     end
