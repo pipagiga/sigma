@@ -148,7 +148,7 @@ local function equipAndSubmit(ingredientName, limitValue)
         if item:IsA("Tool") then
             local numberStr = string.match(item.Name, "%[(%d*%.?%d*)")
             local numberVal = tonumber(numberStr) or 0
-            if string.find(item.Name, ingredientName.."[") and numberVal <= tonumber(limitValue) then
+            if string.find(item.Name, ..ingredientName.."[") and numberVal <= tonumber(limitValue) then
                 item.Parent = player.Character
                 local args = {"SubmitHeldPlant", KitBoxes[1].Text}
                 ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
@@ -295,3 +295,4 @@ local function processIngredients()
 end
 
 processIngredients()
+
