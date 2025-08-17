@@ -98,7 +98,6 @@ IngredLabel.TextXAlignment = Enum.TextXAlignment.Left
 IngredLabel.Parent = Frame
 
 local IngredientBoxes = {}
-local LimitBoxes = {}
 for i=1,5 do
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 50, 0, 20)
@@ -109,21 +108,11 @@ for i=1,5 do
     box.TextColor3 = Color3.fromRGB(255,255,255)
     box.Parent = Frame
     table.insert(IngredientBoxes, box)
-
-    local limitBox = Instance.new("TextBox")
-    limitBox.Size = UDim2.new(0, 25, 0, 20)
-    limitBox.Position = UDim2.new(0, 5 + (i-1)*55, 0, 100)
-    limitBox.Text = "99999999"
-    limitBox.ClearTextOnFocus = false
-    limitBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
-    limitBox.TextColor3 = Color3.fromRGB(255,255,255)
-    limitBox.Parent = Frame
-    table.insert(LimitBoxes, limitBox)
 end
 
 local KitLabel = Instance.new("TextLabel")
 KitLabel.Size = UDim2.new(0, 100, 0, 20)
-KitLabel.Position = UDim2.new(0, 5, 0, 130)
+KitLabel.Position = UDim2.new(0, 5, 0, 105)
 KitLabel.Text = "Cooking Kits:"
 KitLabel.TextColor3 = Color3.fromRGB(255,255,255)
 KitLabel.BackgroundTransparency = 1
@@ -134,7 +123,7 @@ local KitBoxes = {}
 for i=1,3 do
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 50, 0, 20)
-    box.Position = UDim2.new(0, 5 + (i-1)*55, 0, 155)
+    box.Position = UDim2.new(0, 5 + (i-1)*55, 0, 130)
     box.Text = ""
     box.ClearTextOnFocus = false
     box.BackgroundColor3 = Color3.fromRGB(70,70,70)
@@ -143,23 +132,13 @@ for i=1,3 do
     table.insert(KitBoxes, box)
 end
 
-local function equipAndSubmit(ingredientName, kgLimit)
+local function equipAndSubmit(ingredientName)
     for _, item in ipairs(backpack:GetChildren()) do
-        if item:IsA("Tool") then
-            local stringNumber = string.match(item.Name, "%[(%d+)%.%d*kg%]$")
-            local numberX = tonumber(stringNumber) or 0
-            if string.find(item.Name, ingredientName.." %[") then
-                print("Encontrado item:", item.Name, "X extraído:", numberX, "Limite:", kgLimit)
-                if numberX <= tonumber(kgLimit) then
-                    print("Equipando item:", item.Name)
-                    item.Parent = player.Character
-                    local args = {"SubmitHeldPlant", KitBoxes[1].Text}
-                    ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
-                    return true
-                else
-                    print("Ignorando item, X acima do limite:", item.Name)
-                end
-            end
+        if item:IsA("Tool") and string.match(item.Name, "^" .. ingredientName .. " %[.-%]$") then
+            item.Parent = player.Character
+            local args = {"SubmitHeldPlant", KitBoxes[1].Text}
+            ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
+            return true
         end
     end
     return false
@@ -197,7 +176,7 @@ local function findPlayerFarm()
                 if sg then
                     local playerLabel = sg:FindFirstChild("Player") and sg.Player:FindFirstChildWhichIsA("TextLabel")
                     if playerLabel and string.find(playerLabel.Text, player.Name) then
-                        print("farm do jogador encontrada:", farm.Name, "Índice:", idx)
+                        print("✅ Farm do jogador encontrada:", farm.Name, "Índice:", idx)
                         return farm, idx
                     end
                 end
@@ -237,8 +216,8 @@ local function processIngredients()
                 continue
             end
             StatusLabel.Text = "pedrácio hubulus está em busca do cooking kit"
-            local cukpot, cukpotIndex = findCookingKit(farm)
-            if not cukpot then
+            local cp, cpIndex = findCookingKit(farm)
+            if not cp then
                 StatusLabel.Text = "pedrácio hubulus não encontrou o cooking pot, tentando novamente..."
                 task.wait(2)
                 continue
@@ -246,7 +225,7 @@ local function processIngredients()
             StatusLabel.Text = "pedrácio hubulus está checando o tempo de cuzudo"
             local timeLabel
             local ok, result = pcall(function()
-                return cukpot.CookTimeDisplay.Face.SurfaceGui.TimeDisplayFrame.TimeLabel
+                return cp.CookTimeDisplay.Face.SurfaceGui.TimeDisplayFrame.TimeLabel
             end)
             if ok then
                 timeLabel = result
@@ -271,17 +250,16 @@ local function processIngredients()
                 continue
             end
             StatusLabel.Text = "pedrácio hubulus tá enviando os ingredientes pra cuzer"
-            for idx, box in ipairs(IngredientBoxes) do
+            for _, box in ipairs(IngredientBoxes) do
                 local ingredient = box.Text
-                local limitValue = LimitBoxes[idx].Text
                 if ingredient ~= "" then
-                    local success = equipAndSubmit(ingredient, limitValue)
+                    local success = equipAndSubmit(ingredient)
                     if success then
                         task.wait(1)
                     end
                 end
             end
-            local insidePotFrame = cukpot.IngredientsBoard.IngredientListPart.CookingIngredientGui.Background.InsidePotFrame
+            local insidePotFrame = cp.IngredientsBoard.IngredientListPart.CookingIngredientGui.Background.InsidePotFrame
             local allOk, anyIngredient = allIngredientsInsidePot(insidePotFrame)
             if not anyIngredient then
                 task.wait(1)
