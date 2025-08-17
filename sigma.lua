@@ -1,4 +1,4 @@
-local HttpService = game:GetService("HttpService") -- bu
+local HttpService = game:GetService("HttpService")
 local saveFile = "pedrohub_sigma.json"
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -54,6 +54,15 @@ local function loadConfig()
     end
 end
 
+local function clearHands()
+    for _, item in ipairs(character:GetChildren()) do 
+        if item:IsA("Tool") then
+            item.Parent = backpack
+            print("desequipou " .. item.Name) 
+        end
+    end
+end
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
@@ -89,6 +98,42 @@ local function createButton(text, pos)
     return btn
 end
 
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 360, 0, 220)
+Frame.Position = UDim2.new(0.5, -170, 0, 100)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Parent = ScreenGui
+
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 25)
+TitleBar.Position = UDim2.new(0, 0, 0, 0)
+TitleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TitleBar.Parent = Frame
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(0, 100, 1, 0)
+TitleLabel.Position = UDim2.new(0, 5, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.Text = "pedrohub v1.1.0"
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = TitleBar
+
+local function createButton(text, pos)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 20, 0, 20)
+    btn.Position = pos
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    btn.Parent = TitleBar
+    return btn
+end
+
+local TestBtn = createButton("⚠️", UDim2.new(1, -200, 0, 2))
 local UpBtn = createButton("↑", UDim2.new(1, -175, 0, 2))
 local DownBtn = createButton("↓", UDim2.new(1, -150, 0, 2))
 local LeftBtn = createButton("←", UDim2.new(1, -125, 0, 2))
@@ -112,6 +157,8 @@ PauseButton.MouseButton1Click:Connect(function()
 end)
 
 SaveBtn.MouseButton1Click:Connect(saveConfig)
+
+TestBtn.MouseButton1Click:Connect(clearHands)
 
 local moveIncrement = 40
 UpBtn.MouseButton1Click:Connect(function()
@@ -324,6 +371,7 @@ local function processIngredients()
 end
 
 processIngredients()
+
 
 
 
