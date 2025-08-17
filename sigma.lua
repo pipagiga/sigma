@@ -22,7 +22,7 @@ local function saveConfig()
     end
     
     writefile(saveFile, HttpService:JSONEncode(config))
-    print("salvo!")
+    print("config salva!")
 end
 
 local function loadConfig()
@@ -49,7 +49,7 @@ local function loadConfig()
             end
             print("config carregada!")
         else
-            warn("erro ao ler o arquivo de config")
+            print("erro ao ler o arquivo de config")
         end
     end
 end
@@ -74,7 +74,7 @@ TitleLabel.Size = UDim2.new(0, 100, 1, 0)
 TitleLabel.Position = UDim2.new(0, 5, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.Text = "pedrohub v1.0.1"
+TitleLabel.Text = "pedrohub v1.1.0"
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = TitleBar
 
@@ -324,4 +324,5 @@ local function processIngredients()
 end
 
 processIngredients()
+
 
