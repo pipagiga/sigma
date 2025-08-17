@@ -1,5 +1,5 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 
@@ -231,8 +231,8 @@ local function processIngredients()
                 continue
             end
             StatusLabel.Text = "pedrácio hubulus está em busca do cooking kit"
-            local cp, cpIndex = findCookingKit(farm)
-            if not cp then
+            local cukpot, cukpotIndex = findCookingKit(farm)
+            if not cukpot then
                 StatusLabel.Text = "pedrácio hubulus não encontrou o cooking pot, tentando novamente..."
                 task.wait(2)
                 continue
@@ -240,7 +240,7 @@ local function processIngredients()
             StatusLabel.Text = "pedrácio hubulus está checando o tempo de cuzudo"
             local timeLabel
             local ok, result = pcall(function()
-                return cp.CookTimeDisplay.Face.SurfaceGui.TimeDisplayFrame.TimeLabel
+                return cukpot.CookTimeDisplay.Face.SurfaceGui.TimeDisplayFrame.TimeLabel
             end)
             if ok then
                 timeLabel = result
@@ -275,7 +275,7 @@ local function processIngredients()
                     end
                 end
             end
-            local insidePotFrame = cp.IngredientsBoard.IngredientListPart.CookingIngredientGui.Background.InsidePotFrame
+            local insidePotFrame = cukpot.IngredientsBoard.IngredientListPart.CookingIngredientGui.Background.InsidePotFrame
             local allOk, anyIngredient = allIngredientsInsidePot(insidePotFrame)
             if not anyIngredient then
                 task.wait(1)
@@ -295,4 +295,5 @@ local function processIngredients()
 end
 
 processIngredients()
+
 
