@@ -1,7 +1,58 @@
+local HttpService = game:GetService("HttpService")
+local saveFile = "pedrohub_sigma.json"
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
+
+local IngredientBoxes = {}
+local KitBoxes = {}
+
+local function saveConfig()
+    local config = {
+        Ingredients = {},
+        Kits = {}
+    }
+
+    for i, box in ipairs(IngredientBoxes) do
+        table.insert(config.Ingredients, box.Text)
+    end
+    for i, box in ipairs(KitBoxes) do
+        table.insert(config.Kits, box.Text)
+    end
+    
+    writefile(saveFile, HttpService:JSONEncode(config))
+    print("salvo!")
+end
+
+local function loadConfig()
+    if isfile(saveFile) then
+        local success, decoded = pcall(function()
+            return HttpService:JSONDecode(readfile(saveFile))
+        end)
+
+        if success then
+            if decoded.Ingredients then
+                for i, text in ipairs(decoded.Ingredients) do
+                    if IngredientBoxes[i] then
+                        IngredientBoxes[i].Text = text
+                    end
+                end
+            end
+
+            if decoded.Kits then
+                for i, text in ipairs(decoded.Kits) do
+                    if KitBoxes[i] then
+                        KitBoxes[i].Text = text
+                    end
+                end
+            end
+            print("config carregada!")
+        else
+            warn("erro ao ler o arquivo de config")
+        end
+    end
+end
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
@@ -42,14 +93,13 @@ local UpBtn = createButton("↑", UDim2.new(1, -175, 0, 2))
 local DownBtn = createButton("↓", UDim2.new(1, -150, 0, 2))
 local LeftBtn = createButton("←", UDim2.new(1, -125, 0, 2))
 local RightBtn = createButton("→", UDim2.new(1, -100, 0, 2))
-local ResetBtn = createButton("🔄", UDim2.new(1, -75, 0, 2))
+local SaveBtn = createButton("💾", UDim2.new(1, -75, 0, 2))
 local PauseButton = createButton("▶️", UDim2.new(1, -50, 0, 2))
 local CloseButton = createButton("X", UDim2.new(1, -25, 0, 2))
 CloseButton.TextColor3 = Color3.fromRGB(255, 0, 0)
 
 local running = true
 local paused = true
-local forceReset = false
 
 CloseButton.MouseButton1Click:Connect(function()
     running = false
@@ -61,9 +111,7 @@ PauseButton.MouseButton1Click:Connect(function()
     PauseButton.Text = paused and "▶️" or "⏸️"
 end)
 
-ResetBtn.MouseButton1Click:Connect(function()
-    forceReset = true
-end)
+SaveBtn.MouseButton1Click:Connect(saveConfig)
 
 local moveIncrement = 40
 UpBtn.MouseButton1Click:Connect(function()
@@ -73,7 +121,7 @@ DownBtn.MouseButton1Click:Connect(function()
     Frame.Position = Frame.Position + UDim2.new(0,0,0,moveIncrement)
 end)
 LeftBtn.MouseButton1Click:Connect(function()
-    Frame.Position = Frame.Position - UDim2.new(0,moveIncrement,0,0)
+    Frame.Position = Frame.Position - UDim2.new(0,360,0,0)
 end)
 RightBtn.MouseButton1Click:Connect(function()
     Frame.Position = Frame.Position + UDim2.new(0,moveIncrement,0,0)
@@ -97,7 +145,6 @@ IngredLabel.BackgroundTransparency = 1
 IngredLabel.TextXAlignment = Enum.TextXAlignment.Left
 IngredLabel.Parent = Frame
 
-local IngredientBoxes = {}
 for i=1,5 do
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 50, 0, 20)
@@ -119,7 +166,6 @@ KitLabel.BackgroundTransparency = 1
 KitLabel.TextXAlignment = Enum.TextXAlignment.Left
 KitLabel.Parent = Frame
 
-local KitBoxes = {}
 for i=1,3 do
     local box = Instance.new("TextBox")
     box.Size = UDim2.new(0, 50, 0, 20)
@@ -131,6 +177,8 @@ for i=1,3 do
     box.Parent = Frame
     table.insert(KitBoxes, box)
 end
+
+loadConfig()
 
 local function equipAndSubmit(ingredientName)
     for _, item in ipairs(backpack:GetChildren()) do
@@ -205,9 +253,6 @@ local function processIngredients()
                 task.wait(0.5)
                 continue
             end
-            if forceReset then
-                forceReset = false
-            end
             StatusLabel.Text = "pedrácio hubulus está em busca da plot do player"
             local farm, farmIndex = findPlayerFarm()
             if not farm then
@@ -279,3 +324,4 @@ local function processIngredients()
 end
 
 processIngredients()
+
