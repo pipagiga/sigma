@@ -1,4 +1,4 @@
-local Players = game:GetService("Players")
+local Players = game:GetService("Players") 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
@@ -148,7 +148,7 @@ local function equipAndSubmit(ingredientName, limitValue)
         if item:IsA("Tool") then
             local numberStr = string.match(item.Name, "%[(%d*%.?%d*)")
             local numberVal = tonumber(numberStr) or 0
-            if string.find(item.Name, "^"..ingredientName.."[") and numberVal <= tonumber(limitValue) then
+            if string.find(item.Name, ingredientName.."[") and numberVal <= tonumber(limitValue) then
                 item.Parent = player.Character
                 local args = {"SubmitHeldPlant", KitBoxes[1].Text}
                 ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
@@ -214,11 +214,12 @@ end
 
 local function processIngredients()
     task.spawn(function()
+        ::loop::
         while running do
             if paused then
                 StatusLabel.Text = "pedrácio hubulus tá afim de rodar, mas pausarão ele..."
                 task.wait(0.5)
-                continue
+                goto loop
             end
             if forceReset then
                 forceReset = false
@@ -228,26 +229,26 @@ local function processIngredients()
             if not farm then
                 StatusLabel.Text = "pedrácio hubulus não encontrou a plot do player, tentando novamente..."
                 task.wait(2)
-                continue
+                goto loop
             end
             StatusLabel.Text = "pedrácio hubulus está em busca do cooking kit"
             local cukpot, cukpotIndex = findCookingKit(farm)
             if not cukpot then
                 StatusLabel.Text = "pedrácio hubulus não encontrou o cooking pot, tentando novamente..."
                 task.wait(2)
-                continue
+                goto loop
             end
             StatusLabel.Text = "pedrácio hubulus está checando o tempo de cuzudo"
             local timeLabel
             local ok, result = pcall(function()
-                return cukpot.CookTimeDisplay.Face.SurfaceGui.TimeDisplayFrame.TimeLabel
+                return cukpot.CookTimeDisplay.Face.SurfaceGui:WaitForChild("TimeDisplayFrame"):WaitForChild("TimeLabel")
             end)
             if ok then
                 timeLabel = result
             else
                 StatusLabel.Text = "pedrácio hubulus não conseguiu checar o tempo de cuzudo"
                 task.wait(2)
-                continue
+                goto loop
             end
             local timeText = timeLabel.Text
             StatusLabel.Text = "pedrácio hubulus checou e faltam "..timeText.." para terminar de cuzur"
@@ -262,7 +263,7 @@ local function processIngredients()
                 local args = {"CookBest", KitBoxes[1].Text}
                 ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("CookingPotService_RE"):FireServer(unpack(args))
                 task.wait(5)
-                continue
+                goto loop
             end
             StatusLabel.Text = "pedrácio hubulus tá enviando os ingredientes pra cuzer"
             for idx, box in ipairs(IngredientBoxes) do
@@ -279,7 +280,7 @@ local function processIngredients()
             local allOk, anyIngredient = allIngredientsInsidePot(insidePotFrame)
             if not anyIngredient then
                 task.wait(1)
-                continue
+                goto loop
             end
             if allOk then
                 StatusLabel.Text = "pedrácio hubulus decidiu que é hora de cuzar"
@@ -295,6 +296,3 @@ local function processIngredients()
 end
 
 processIngredients()
-
-
-
