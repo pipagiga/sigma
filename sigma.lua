@@ -7,7 +7,7 @@ Notif.OnClientEvent:Connect(function(m) m=tostring(m):lower(); if m:find("not an
 
 local Cook=GE:WaitForChild("CookingPotService_RE")
 local function hum() local ch=P.Character or P.CharacterAdded:Wait(); return ch:WaitForChild("Humanoid") end
-local function wanted(n) n=n:lower(); return (n:find("blueberry",1,true) or n:find("corn",1,true) or n:find("tomato",1,true) or n:find("apple",1,true) or n:find("pumpkin",1,true) or n:find("coconut",1,true) or n:find("grape",1,true) or n:find("mushroom",1,true) or n:find("cacao",1,true) or n:find("sugar apple",1,true) or n:find("elder strawberry",1,true)) and not n:find("soup") end
+local function wanted(n) n=n:lower(); return (n:find("blueberry",1,true) or n:find("corn",1,true) or n:find("tomato",1,true) or n:find("apple",1,true) or n:find("pumpkin",1,true) or n:find("coconut",1,true) or n:find("grape",1,true) or n:find("mushroom",1,true) or n:find("cacao",1,true) or n:find("sugar apple",1,true) or n:find("elder strawberry",1,true)) and not (n:find("soup") or n:find("smoothie")) end
 local function pick() local bp=P:WaitForChild("Backpack"); local t={} for _,v in ipairs(bp:GetChildren()) do if v:IsA("Tool") and wanted(v.Name) then t[#t+1]=v end end return (#t>0) and t[math.random(#t)] or nil end
 
 local RUN=true
@@ -39,3 +39,4 @@ while RUN do
     else task.wait(0.15) end
     task.wait(0.30)
 end
+
