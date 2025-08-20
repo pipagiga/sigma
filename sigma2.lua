@@ -33,8 +33,8 @@ while RUN do
     if t then
         h:UnequipTools(); task.wait(0.03)
         t.Parent=P.Backpack; task.wait()
-        h:EquipTool(t); task.wait(0.10)
+        h:EquipTool(t); task.wait(0.03)
         Cook:FireServer("Feed", pet_id)
-    else task.wait(0.15) end
-    task.wait(0.30)
+    else task.wait(0.03) end
+    task.wait(0.03)
 end
