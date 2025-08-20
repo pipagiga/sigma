@@ -7,7 +7,7 @@ Notif.OnClientEvent:Connect(function(m) m=tostring(m):lower(); if m:find("not an
 
 local Cook=GE:WaitForChild("ActivePetService")
 local function hum() local ch=P.Character or P.CharacterAdded:Wait(); return ch:WaitForChild("Humanoid") end
-local function wanted(n) n=n:lower(); return (n:find("soup",1,true) or n:find("smoothie",1,true)) end
+local function wanted(n) n=n:lower(); return (n:find("soup",1,true) or n:find("smoothie",1,true) or n:find("salad",1,true)) end
 local function pick() local bp=P:WaitForChild("Backpack"); local t={} for _,v in ipairs(bp:GetChildren()) do if v:IsA("Tool") and wanted(v.Name) then t[#t+1]=v end end return (#t>0) and t[math.random(#t)] or nil end
 
 local RUN=true
